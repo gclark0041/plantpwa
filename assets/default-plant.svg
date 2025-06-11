@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="potGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="leafGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#228B22;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#006400;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge> 
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/> 
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Pot -->
+  <path d="M 60 120 L 70 170 L 130 170 L 140 120 Z" fill="url(#potGradient)" filter="url(#shadow)"/>
+  <ellipse cx="100" cy="120" rx="40" ry="10" fill="#654321"/>
+  
+  <!-- Soil -->
+  <ellipse cx="100" cy="120" rx="35" ry="8" fill="#3E2723"/>
+  
+  <!-- Stem -->
+  <rect x="98" y="80" width="4" height="40" fill="#228B22"/>
+  
+  <!-- Leaves -->
+  <g filter="url(#shadow)">
+    <!-- Left leaf -->
+    <path d="M 100 90 Q 70 70 60 90 Q 70 100 100 95 Z" fill="url(#leafGradient)"/>
+    <!-- Right leaf -->
+    <path d="M 100 90 Q 130 70 140 90 Q 130 100 100 95 Z" fill="url(#leafGradient)"/>
+    <!-- Center leaf -->
+    <path d="M 100 80 Q 90 50 100 40 Q 110 50 100 80 Z" fill="url(#leafGradient)"/>
+    <!-- Small left leaf -->
+    <path d="M 100 100 Q 80 85 75 95 Q 80 105 100 102 Z" fill="url(#leafGradient)"/>
+    <!-- Small right leaf -->
+    <path d="M 100 100 Q 120 85 125 95 Q 120 105 100 102 Z" fill="url(#leafGradient)"/>
+  </g>
+  
+  <!-- Leaf details -->
+  <g stroke="#006400" stroke-width="0.5" fill="none">
+    <path d="M 80 85 L 85 87"/>
+    <path d="M 120 85 L 115 87"/>
+    <path d="M 100 60 L 100 65"/>
+  </g>
+  
+  <!-- Pot rim -->
+  <ellipse cx="100" cy="120" rx="40" ry="10" fill="none" stroke="#654321" stroke-width="2"/>
+</svg>

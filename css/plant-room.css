@@ -1,0 +1,390 @@
+/* Plant Room Styles */
+.plant-room-container {
+    padding: 20px;
+    height: calc(100vh - var(--nav-height) - 100px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.plant-room {
+    flex: 1;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1);
+    cursor: move;
+}
+
+.room-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%),
+        radial-gradient(circle at 20% 50%, rgba(26, 95, 63, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(232, 180, 160, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+/* Room Grid System */
+.room-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 1px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.room-grid.show {
+    opacity: 0.1;
+}
+
+.room-grid::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(0,0,0,0.05) 50px, rgba(0,0,0,0.05) 51px),
+        repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(0,0,0,0.05) 50px, rgba(0,0,0,0.05) 51px);
+    pointer-events: none;
+}
+
+/* Plants Container */
+.plants-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Plant Items in Room */
+.room-plant {
+    position: absolute;
+    cursor: grab;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    z-index: 10;
+    transform-origin: bottom center;
+}
+
+.room-plant:hover {
+    filter: brightness(1.1);
+    transform: scale(1.05);
+}
+
+.room-plant.dragging {
+    cursor: grabbing;
+    z-index: 100;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+    transform: scale(1.1) rotate(5deg);
+}
+
+.room-plant img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
+}
+
+.room-plant-label {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.room-plant:hover .room-plant-label {
+    opacity: 1;
+}
+
+/* Room Controls */
+.room-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* Room Customization Panel */
+.customization-panel {
+    position: absolute;
+    right: 20px;
+    top: 80px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    width: 300px;
+    transform: translateX(320px);
+    transition: transform 0.3s ease;
+    z-index: 50;
+}
+
+.customization-panel.active {
+    transform: translateX(0);
+}
+
+.customization-section {
+    margin-bottom: 24px;
+}
+
+.customization-section h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: var(--primary-color);
+}
+
+/* Room Themes */
+.theme-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.theme-option {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-option.active {
+    border-color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.theme-option::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.theme-option.active::after {
+    opacity: 1;
+}
+
+/* Theme Variants */
+.theme-minimal {
+    background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+}
+
+.theme-nature {
+    background: linear-gradient(135deg, #e8f5e9, #a5d6a7);
+}
+
+.theme-sunset {
+    background: linear-gradient(135deg, #ffccbc, #ffab91);
+}
+
+.theme-ocean {
+    background: linear-gradient(135deg, #b3e5fc, #4fc3f7);
+}
+
+.theme-desert {
+    background: linear-gradient(135deg, #ffe0b2, #ffcc80);
+}
+
+.theme-night {
+    background: linear-gradient(135deg, #263238, #37474f);
+}
+
+/* Wallpaper Options */
+.wallpaper-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wallpaper-option {
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: var(--background);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wallpaper-option.active {
+    border-color: var(--primary-color);
+    background: rgba(26, 95, 63, 0.1);
+}
+
+.wallpaper-option i {
+    font-size: 20px;
+    color: var(--primary-color);
+}
+
+/* Plant Size Slider */
+.size-slider {
+    margin-top: 12px;
+}
+
+.size-slider input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+}
+
+.size-slider input[type="range"]::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.size-preview {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* Full Room View */
+.room-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.room-fullscreen.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.room-fullscreen .plant-room {
+    width: 90vw;
+    height: 90vh;
+    max-width: 1200px;
+    max-height: 800px;
+}
+
+.room-fullscreen-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.3s ease;
+}
+
+.room-fullscreen-close:hover {
+    transform: scale(1.1) rotate(90deg);
+}
+
+/* Plant Placement Ghost */
+.plant-ghost {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.5;
+    filter: grayscale(50%);
+    transform: scale(1.1);
+    z-index: 99;
+}
+
+/* Drop Zone Indicator */
+.drop-zone-indicator {
+    position: absolute;
+    border: 3px dashed var(--primary-color);
+    border-radius: 50%;
+    background: rgba(26, 95, 63, 0.1);
+    pointer-events: none;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .plant-room-container {
+        height: calc(100vh - var(--nav-height) - 120px);
+    }
+    
+    .room-plant img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .customization-panel {
+        right: 0;
+        left: 0;
+        width: 100%;
+        bottom: 0;
+        top: auto;
+        transform: translateY(100%);
+        border-radius: var(--radius) var(--radius) 0 0;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    .customization-panel.active {
+        transform: translateY(0);
+    }
+}

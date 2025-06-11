@@ -1,0 +1,362 @@
+/* Modern Animations */
+
+/* Micro-interactions */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button, a, .clickable {
+    position: relative;
+    overflow: hidden;
+}
+
+button::before, a::before, .clickable::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+button:active::before, a:active::before, .clickable:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Page Transitions */
+.page-transition-enter {
+    animation: pageEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-transition-exit {
+    animation: pageExit 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pageExit {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+}
+
+/* Plant Card Animations */
+.plant-card {
+    animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+.plant-card:nth-child(1) { animation-delay: 0.05s; }
+.plant-card:nth-child(2) { animation-delay: 0.1s; }
+.plant-card:nth-child(3) { animation-delay: 0.15s; }
+.plant-card:nth-child(4) { animation-delay: 0.2s; }
+.plant-card:nth-child(5) { animation-delay: 0.25s; }
+.plant-card:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Floating Animation for Plants */
+.room-plant {
+    animation: float 6s ease-in-out infinite;
+}
+
+.room-plant:nth-child(odd) {
+    animation-delay: -3s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Water Drop Animation */
+.water-drop {
+    position: absolute;
+    width: 20px;
+    height: 25px;
+    background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    opacity: 0;
+    animation: waterDrop 1.5s ease-in-out;
+}
+
+@keyframes waterDrop {
+    0% {
+        transform: translateY(-20px) scale(0);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(60px) scale(0.3);
+        opacity: 0;
+    }
+}
+
+/* Sparkle Effect */
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #fff;
+    border-radius: 50%;
+    animation: sparkle 1s ease-in-out;
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Loading States */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Success Animation */
+.success-checkmark {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+.success-checkmark circle {
+    stroke: var(--primary-color);
+    stroke-width: 3;
+    fill: none;
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: checkmarkCircle 0.6s ease-in-out forwards;
+}
+
+.success-checkmark path {
+    stroke: var(--primary-color);
+    stroke-width: 3;
+    fill: none;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: checkmarkPath 0.3s ease-in-out 0.3s forwards;
+}
+
+@keyframes checkmarkCircle {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes checkmarkPath {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Plant Growth Animation */
+.plant-growth {
+    transform-origin: bottom center;
+    animation: grow 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes grow {
+    0% {
+        transform: scaleY(0) scaleX(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scaleY(1.1) scaleX(0.95);
+        opacity: 1;
+    }
+    100% {
+        transform: scaleY(1) scaleX(1);
+        opacity: 1;
+    }
+}
+
+/* Bounce Animation */
+.bounce {
+    animation: bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* Shake Animation */
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+/* Glow Effect */
+.glow {
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 10px rgba(26, 95, 63, 0.5);
+    }
+    to {
+        box-shadow: 0 0 30px rgba(26, 95, 63, 0.8);
+    }
+}
+
+/* Heart Beat Animation */
+.heartbeat {
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0%, 100% {
+        transform: scale(1);
+    }
+    10% {
+        transform: scale(1.1);
+    }
+    20% {
+        transform: scale(1);
+    }
+    30% {
+        transform: scale(1.1);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+/* Notification Badge Animation */
+.notification-badge {
+    animation: badgePop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes badgePop {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Swipe Hint Animation */
+.swipe-hint {
+    animation: swipeHint 2s ease-in-out infinite;
+}
+
+@keyframes swipeHint {
+    0%, 100% {
+        transform: translateX(0);
+        opacity: 0.5;
+    }
+    50% {
+        transform: translateX(50px);
+        opacity: 1;
+    }
+}
+
+/* Color Transition */
+.color-transition {
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* 3D Card Flip */
+.card-flip {
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+}
+
+.card-flip.flipped {
+    transform: rotateY(180deg);
+}
+
+/* Parallax Layers */
+.parallax-layer {
+    transition: transform 0.1s ease-out;
+}
+
+/* Smooth Scroll */
+.smooth-scroll {
+    scroll-behavior: smooth;
+}
+
+/* Focus Animations */
+input:focus, textarea:focus {
+    animation: focusPulse 0.3s ease;
+}
+
+@keyframes focusPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(26, 95, 63, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 0 8px rgba(26, 95, 63, 0);
+    }
+}
