@@ -145,10 +145,17 @@ class PlantAPI {
 
     // Helper to format plant data
     formatPlantData(plant) {
+        // Handle scientific_name as array or string
+        let scientificName = '';
+        if (Array.isArray(plant.scientific_name)) {
+            scientificName = plant.scientific_name[0] || '';
+        } else if (typeof plant.scientific_name === 'string') {
+            scientificName = plant.scientific_name;
+        }
         return {
             id: plant.id,
-            name: plant.common_name || plant.scientific_name[0] || 'Unknown Plant',
-            scientificName: plant.scientific_name[0] || '',
+            name: plant.common_name || scientificName || 'Unknown Plant',
+            scientificName: scientificName,
             image: this.getPlantImage(plant),
             thumbnail: this.getPlantImage(plant, 'thumbnail'),
             cycle: plant.cycle || 'Unknown',

@@ -453,3 +453,21 @@ h3 {
     gap: 12px;
     justify-content: flex-end;
 }
+
+.load-more-btn {
+    display: block;
+    margin: 24px auto 0 auto;
+    padding: 12px 32px;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.2s;
+}
+.load-more-btn:hover {
+    background: var(--primary-dark);
+}

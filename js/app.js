@@ -4,6 +4,8 @@ class PlantCareApp {
         this.currentPage = 'room';
         this.plants = [];
         this.isLoading = false;
+        this.discoverPlants = [];
+        this.discoverPage = 1;
         this.init();
     }
 
@@ -116,28 +118,45 @@ class PlantCareApp {
         });
     }
 
-    async loadDiscoverPage() {
+    async loadDiscoverPage(reset = true) {
         const grid = document.getElementById('plant-grid');
         if (!grid || this.isLoading) return;
 
+        if (reset) {
+            this.discoverPlants = [];
+            this.discoverPage = 1;
+        }
+
         this.isLoading = true;
-        grid.innerHTML = '<div class="loader-container"><div class="plant-loader"></div></div>';
+        if (reset) {
+            grid.innerHTML = '<div class="loader-container"><div class="plant-loader"></div></div>';
+        } else {
+            // Show loader at the bottom for load more
+            const loader = document.createElement('div');
+            loader.className = 'loader-container';
+            loader.innerHTML = '<div class="plant-loader"></div>';
+            grid.appendChild(loader);
+        }
 
         try {
-            const result = await plantAPI.searchPlants('', { indoor: 1 });
+            const result = await plantAPI.searchPlants('', { indoor: 1, page: this.discoverPage });
             if (result.data && result.data.length > 0) {
-                this.displayPlants(result.data);
-            } else {
+                this.discoverPlants = this.discoverPlants.concat(result.data);
+                this.displayPlants(this.discoverPlants, true);
+                this.discoverPage++;
+            } else if (reset) {
                 grid.innerHTML = '<p class="no-results">No plants found. Try searching!</p>';
             }
         } catch (error) {
-            grid.innerHTML = '<p class="error">Failed to load plants. Please try again.</p>';
+            if (reset) {
+                grid.innerHTML = '<p class="error">Failed to load plants. Please try again.</p>';
+            }
         } finally {
             this.isLoading = false;
         }
     }
 
-    displayPlants(plants) {
+    displayPlants(plants, showLoadMore = false) {
         const grid = document.getElementById('plant-grid');
         grid.innerHTML = plants.map(plant => {
             const formatted = plantAPI.formatPlantData(plant);
@@ -161,6 +180,22 @@ class PlantCareApp {
                 this.showPlantDetailsModal(plantId);
             });
         });
+
+        // Add Load More button if needed
+        if (showLoadMore) {
+            let loadMoreBtn = document.getElementById('load-more-btn');
+            if (!loadMoreBtn) {
+                loadMoreBtn = document.createElement('button');
+                loadMoreBtn.id = 'load-more-btn';
+                loadMoreBtn.className = 'load-more-btn';
+                loadMoreBtn.textContent = 'Load More';
+                loadMoreBtn.onclick = () => this.loadDiscoverPage(false);
+                grid.parentNode.appendChild(loadMoreBtn);
+            }
+        } else {
+            const btn = document.getElementById('load-more-btn');
+            if (btn) btn.remove();
+        }
     }
 
     async searchPlants(query) {
