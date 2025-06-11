@@ -15,6 +15,7 @@ class PlantCareApp {
         this.updateStats();
         this.setupEventListeners();
         this.checkNotifications();
+        this.setupInfiniteScroll();
     }
 
     setupNavigation() {
@@ -95,7 +96,33 @@ class PlantCareApp {
             chip.addEventListener('click', () => {
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
-                this.filterPlants(chip.textContent.toLowerCase());
+                // Map chip text to API filter
+                const text = chip.textContent.trim().toLowerCase();
+                let filter = null;
+                switch (text) {
+                    case 'indoor':
+                        filter = { indoor: 1 };
+                        break;
+                    case 'outdoor':
+                        filter = { indoor: 0 };
+                        break;
+                    case 'edible':
+                        filter = { edible: 1 };
+                        break;
+                    case 'poisonous':
+                        filter = { poisonous: 1 };
+                        break;
+                    case 'annual':
+                        filter = { cycle: 'annual' };
+                        break;
+                    case 'perennial':
+                        filter = { cycle: 'perennial' };
+                        break;
+                    case 'all':
+                    default:
+                        filter = null;
+                }
+                this.filterPlants(filter);
             });
         });
 
@@ -118,6 +145,9 @@ class PlantCareApp {
         });
     }
 
+    // Store current search/filter state
+    currentSearch = '';
+    currentFilter = null;
     async loadDiscoverPage(reset = true) {
         const grid = document.getElementById('plant-grid');
         if (!grid || this.isLoading) return;
@@ -139,7 +169,14 @@ class PlantCareApp {
         }
 
         try {
-            const result = await plantAPI.searchPlants('', { indoor: 1, page: this.discoverPage });
+            let result;
+            if (this.currentSearch) {
+                result = await plantAPI.searchPlants(this.currentSearch, { ...this.currentFilter, page: this.discoverPage });
+            } else if (this.currentFilter) {
+                result = await plantAPI.searchPlants('', { ...this.currentFilter, page: this.discoverPage });
+            } else {
+                result = await plantAPI.searchPlants('', { indoor: 1, page: this.discoverPage });
+            }
             if (result.data && result.data.length > 0) {
                 this.discoverPlants = this.discoverPlants.concat(result.data);
                 this.displayPlants(this.discoverPlants, true);
@@ -167,7 +204,7 @@ class PlantCareApp {
                          onerror="this.src='assets/default-plant.svg'">
                     <div class="plant-card-info">
                         <h3>${formatted.name}</h3>
-                        <p>${formatted.cycle}</p>
+                        <p>${formatted.scientificName || ''}</p>
                     </div>
                 </div>
             `;
@@ -180,73 +217,21 @@ class PlantCareApp {
                 this.showPlantDetailsModal(plantId);
             });
         });
-
-        // Add Load More button if needed
-        if (showLoadMore) {
-            let loadMoreBtn = document.getElementById('load-more-btn');
-            if (!loadMoreBtn) {
-                loadMoreBtn = document.createElement('button');
-                loadMoreBtn.id = 'load-more-btn';
-                loadMoreBtn.className = 'load-more-btn';
-                loadMoreBtn.textContent = 'Load More';
-                loadMoreBtn.onclick = () => this.loadDiscoverPage(false);
-                grid.parentNode.appendChild(loadMoreBtn);
-            }
-        } else {
-            const btn = document.getElementById('load-more-btn');
-            if (btn) btn.remove();
-        }
+        // Remove Load More button if present
+        const btn = document.getElementById('load-more-btn');
+        if (btn) btn.remove();
     }
 
     async searchPlants(query) {
-        if (!query.trim()) return;
-
-        const grid = document.getElementById('plant-grid');
-        grid.innerHTML = '<div class="loader-container"><div class="plant-loader"></div></div>';
-
-        try {
-            const result = await plantAPI.searchPlants(query);
-            if (result.data && result.data.length > 0) {
-                this.displayPlants(result.data);
-            } else {
-                grid.innerHTML = '<p class="no-results">No plants found for your search.</p>';
-            }
-        } catch (error) {
-            grid.innerHTML = '<p class="error">Search failed. Please try again.</p>';
-        }
+        this.currentSearch = query;
+        this.currentFilter = null;
+        await this.loadDiscoverPage(true);
     }
 
     async filterPlants(filter) {
-        const grid = document.getElementById('plant-grid');
-        grid.innerHTML = '<div class="loader-container"><div class="plant-loader"></div></div>';
-
-        try {
-            let result;
-            switch(filter) {
-                case 'indoor':
-                    result = await plantAPI.searchPlants('', { indoor: 1 });
-                    break;
-                case 'outdoor':
-                    result = await plantAPI.searchPlants('', { indoor: 0 });
-                    break;
-                case 'succulents':
-                    result = await plantAPI.searchPlants('succulent');
-                    break;
-                case 'flowering':
-                    result = await plantAPI.searchPlants('flowering');
-                    break;
-                default:
-                    result = await plantAPI.searchPlants('');
-            }
-
-            if (result.data && result.data.length > 0) {
-                this.displayPlants(result.data);
-            } else {
-                grid.innerHTML = '<p class="no-results">No plants found in this category.</p>';
-            }
-        } catch (error) {
-            grid.innerHTML = '<p class="error">Failed to filter plants.</p>';
-        }
+        this.currentSearch = '';
+        this.currentFilter = filter;
+        await this.loadDiscoverPage(true);
     }
 
     async showPlantDetailsModal(plantId) {
@@ -395,7 +380,10 @@ class PlantCareApp {
                         // Add to room if on room page
                         if (this.currentPage === 'room' && plantRoom) {
                             plantRoom.addPlantToRoom(addedPlant);
+                            plantRoom.loadRoom();
                         }
+                        // Auto-generate care tasks from API
+                        this.generateCareTasksForPlant(addedPlant);
                     }
                 },
                 { text: 'Cancel', class: 'secondary', action: () => this.closeModal() }
@@ -430,6 +418,20 @@ class PlantCareApp {
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
                           'July', 'August', 'September', 'October', 'November', 'December'];
         monthElement.textContent = `${monthNames[today.getMonth()]} ${today.getFullYear()}`;
+
+        // Add event listeners for edit/delete
+        document.querySelectorAll('.task-edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const taskId = parseInt(btn.closest('.task-item').dataset.taskId);
+                this.showEditTaskModal(taskId);
+            });
+        });
+        document.querySelectorAll('.task-delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const taskId = parseInt(btn.closest('.task-item').dataset.taskId);
+                this.showDeleteTaskModal(taskId);
+            });
+        });
     }
 
     createTaskElement(task) {
@@ -443,11 +445,89 @@ class PlantCareApp {
                     ${task.completed ? '<i class="fas fa-check"></i>' : ''}
                 </div>
                 <div class="task-info">
-                    <h4>${task.type === 'water' ? '💧' : '🌱'} ${task.type === 'water' ? 'Water' : 'Fertilize'} ${plant ? plant.nickname : 'Unknown Plant'}</h4>
+                    <h4>${task.type === 'water' ? '💧' : task.type === 'fertilize' ? '🌱' : task.type === 'prune' ? '✂️' : task.type === 'repot' ? '🪴' : '🔔'} ${task.type.charAt(0).toUpperCase() + task.type.slice(1)} ${plant ? plant.nickname : 'Unknown Plant'}</h4>
                     <p>${isToday ? 'Today' : taskDate.toLocaleDateString()}</p>
+                    <p class="task-notes">${task.notes ? task.notes : ''}</p>
+                    ${task.interval ? `<p class="task-interval">Every ${task.interval} days</p>` : ''}
+                </div>
+                <div class="task-actions">
+                    <button class="task-edit-btn" title="Edit"><i class="fas fa-pen"></i></button>
+                    <button class="task-delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
         `;
+    }
+
+    showEditTaskModal(taskId) {
+        const task = (storage.get('tasks') || []).find(t => t.id === taskId);
+        if (!task) return;
+        const plant = storage.getPlant(task.plantId);
+        const content = `
+            <form id="edit-task-form">
+                <div class="form-group">
+                    <label>Plant</label>
+                    <input type="text" value="${plant ? plant.nickname : 'Unknown Plant'}" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Task Type</label>
+                    <input type="text" value="${task.type.charAt(0).toUpperCase() + task.type.slice(1)}" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Next Due Date</label>
+                    <input type="date" id="edit-task-date" value="${new Date(task.date).toISOString().split('T')[0]}">
+                </div>
+                <div class="form-group">
+                    <label>Interval (days, optional)</label>
+                    <input type="number" id="edit-task-interval" value="${task.interval || ''}" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="edit-task-notes" rows="2">${task.notes || ''}</textarea>
+                </div>
+            </form>
+        `;
+        this.createModal({
+            title: 'Edit Task',
+            content: content,
+            actions: [
+                {
+                    text: 'Save',
+                    class: 'primary',
+                    action: () => {
+                        const updates = {
+                            date: document.getElementById('edit-task-date').value,
+                            interval: parseInt(document.getElementById('edit-task-interval').value) || null,
+                            notes: document.getElementById('edit-task-notes').value
+                        };
+                        storage.updateTask(taskId, updates);
+                        this.closeModal();
+                        this.loadCarePage();
+                        this.showNotification('Task updated!', 'success');
+                    }
+                },
+                { text: 'Cancel', class: 'secondary', action: () => this.closeModal() }
+            ]
+        });
+    }
+
+    showDeleteTaskModal(taskId) {
+        this.createModal({
+            title: 'Delete Task',
+            content: '<p>Are you sure you want to delete this task?</p>',
+            actions: [
+                {
+                    text: 'Delete',
+                    class: 'danger',
+                    action: () => {
+                        storage.removeTask(taskId);
+                        this.closeModal();
+                        this.loadCarePage();
+                        this.showNotification('Task deleted!', 'success');
+                    }
+                },
+                { text: 'Cancel', class: 'secondary', action: () => this.closeModal() }
+            ]
+        });
     }
 
     showAddReminderModal() {
@@ -872,6 +952,86 @@ class PlantCareApp {
                     icon: 'assets/icon-192.png'
                 });
             }
+        }
+    }
+
+    setupInfiniteScroll() {
+        const grid = document.getElementById('plant-grid');
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            if (this.currentPage !== 'discover') return;
+            if (this.isLoading) return;
+            const rect = grid.getBoundingClientRect();
+            const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+            // If the bottom of the grid is within 200px of the viewport bottom
+            if (rect.bottom - windowHeight < 200) {
+                this.loadDiscoverPage(false);
+            }
+        });
+    }
+
+    async generateCareTasksForPlant(plant) {
+        // Fetch care guide from API
+        const careGuide = await plantAPI.getPlantCareGuide(plant.id);
+        if (!careGuide || !careGuide.section) return;
+        const existingTasks = (storage.get('tasks') || []).filter(t => t.plantId === plant.id);
+        const now = new Date();
+        careGuide.section.forEach(section => {
+            let type = '';
+            let interval = null;
+            let notes = section.description;
+            // Determine type and interval from section
+            const desc = section.description.toLowerCase();
+            if (section.type.toLowerCase().includes('water')) {
+                type = 'water';
+                const match = desc.match(/every (\d+) day/);
+                if (match) interval = parseInt(match[1]);
+            } else if (section.type.toLowerCase().includes('fertiliz')) {
+                type = 'fertilize';
+                const match = desc.match(/every (\d+) (day|week|month)/);
+                if (match) {
+                    const num = parseInt(match[1]);
+                    if (match[2].startsWith('day')) interval = num;
+                    else if (match[2].startsWith('week')) interval = num * 7;
+                    else if (match[2].startsWith('month')) interval = num * 30;
+                }
+            } else if (section.type.toLowerCase().includes('prun')) {
+                type = 'prune';
+                // Try to extract interval
+                const match = desc.match(/every (\d+) (day|week|month)/);
+                if (match) {
+                    const num = parseInt(match[1]);
+                    if (match[2].startsWith('day')) interval = num;
+                    else if (match[2].startsWith('week')) interval = num * 7;
+                    else if (match[2].startsWith('month')) interval = num * 30;
+                }
+            } else if (section.type.toLowerCase().includes('repot')) {
+                type = 'repot';
+                const match = desc.match(/every (\d+) (year|month)/);
+                if (match) {
+                    const num = parseInt(match[1]);
+                    if (match[2].startsWith('month')) interval = num * 30;
+                    else if (match[2].startsWith('year')) interval = num * 365;
+                }
+            } else {
+                // Other care types
+                type = section.type.toLowerCase();
+            }
+            // Only add if not already present for this plant and type
+            if (type && !existingTasks.some(t => t.type === type)) {
+                storage.addTask({
+                    plantId: plant.id,
+                    type,
+                    date: now.toISOString(),
+                    interval,
+                    notes,
+                    recurring: !!interval
+                });
+            }
+        });
+        // Optionally, refresh care page if visible
+        if (this.currentPage === 'care') {
+            this.loadCarePage();
         }
     }
 }
