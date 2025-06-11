@@ -654,6 +654,62 @@ body.dark-mode {
     color: var(--primary-color);
 }
 
+/* Care tips styling */
+.care-tips {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.care-tips li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+.care-tips li:last-child {
+    border-bottom: none;
+}
+
+.scientific-name {
+    font-style: italic;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.detail-sections {
+    margin-top: 20px;
+}
+
+.detail-section {
+    margin-bottom: 24px;
+}
+
+.detail-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 12px;
+    font-size: 18px;
+}
+
+.guide-section {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--background);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.guide-section h4 {
+    margin: 0 0 8px 0;
+    color: var(--primary-color);
+    text-transform: capitalize;
+}
+
+.guide-section p {
+    margin: 0;
+    line-height: 1.5;
+}
+
 /* Task styles */
 .task-item {
     display: flex;

@@ -247,6 +247,29 @@ class PlantCareApp {
             const plant = plantAPI.formatPlantData(details);
             const careGuide = await plantAPI.getPlantCareGuide(plantId);
 
+            // Create helpful care tips based on plant characteristics
+            const getCareAdvice = () => {
+                let advice = [];
+                
+                if (plant.indoor) {
+                    advice.push("💡 Great for indoor growing");
+                }
+                if (plant.drought_tolerant) {
+                    advice.push("🌵 Drought tolerant - water less frequently");
+                }
+                if (plant.tropical) {
+                    advice.push("🌴 Tropical plant - needs warmth and humidity");
+                }
+                if (plant.poisonous) {
+                    advice.push("⚠️ Keep away from pets and children");
+                }
+                if (plant.edible) {
+                    advice.push("🍃 Edible - can be used in cooking");
+                }
+                
+                return advice.length > 0 ? advice : ["🌱 Regular plant care recommended"];
+            };
+
             const content = `
                 <div class="plant-detail-modal">
                     <img src="${plant.image}" alt="${plant.name}" class="detail-image">
@@ -282,6 +305,13 @@ class PlantCareApp {
                                 </div>
                             </div>
                         </div>
+
+                        <div class="detail-section">
+                            <h3>Care Tips</h3>
+                            <ul class="care-tips">
+                                ${getCareAdvice().map(tip => `<li>${tip}</li>`).join('')}
+                            </ul>
+                        </div>
                         
                         ${plant.description ? `
                             <div class="detail-section">
@@ -290,19 +320,29 @@ class PlantCareApp {
                             </div>
                         ` : ''}
                         
-                        ${careGuide ? `
+                        ${careGuide && careGuide.section ? `
                             <div class="detail-section">
-                                <h3>Care Guide</h3>
+                                <h3>Detailed Care Guide</h3>
                                 <div class="care-guide">
-                                    ${careGuide.section ? careGuide.section.map(section => `
+                                    ${careGuide.section.map(section => `
                                         <div class="guide-section">
                                             <h4>${section.type}</h4>
                                             <p>${section.description}</p>
                                         </div>
-                                    `).join('') : ''}
+                                    `).join('')}
                                 </div>
                             </div>
-                        ` : ''}
+                        ` : `
+                            <div class="detail-section">
+                                <h3>General Care Guidelines</h3>
+                                <div class="care-guide">
+                                    <p>💧 <strong>Watering:</strong> ${plant.watering === 'Moderate watering' ? 'Water when top inch of soil feels dry' : plant.watering}</p>
+                                    <p>☀️ <strong>Light:</strong> ${plant.sunlight.join(' or ').toLowerCase()}</p>
+                                    <p>🌡️ <strong>Temperature:</strong> Most plants prefer 65-75°F (18-24°C)</p>
+                                    <p>💨 <strong>Humidity:</strong> Average household humidity is usually sufficient</p>
+                                </div>
+                            </div>
+                        `}
                     </div>
                 </div>
             `;

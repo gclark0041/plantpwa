@@ -152,24 +152,41 @@ class PlantAPI {
         } else if (typeof plant.scientific_name === 'string') {
             scientificName = plant.scientific_name;
         }
+
+        // Helper function to get readable care info
+        const getCareInfo = (value, defaultValue = 'Not specified') => {
+            if (!value || value === 'Unknown' || value === '') return defaultValue;
+            return value;
+        };
+
+        // Helper to format sunlight array
+        const formatSunlight = (sunlight) => {
+            if (Array.isArray(sunlight) && sunlight.length > 0) {
+                return sunlight.filter(s => s && s !== 'Unknown');
+            } else if (typeof sunlight === 'string' && sunlight !== 'Unknown') {
+                return [sunlight];
+            }
+            return ['Not specified'];
+        };
+
         return {
             id: plant.id,
             name: plant.common_name || scientificName || 'Unknown Plant',
             scientificName: scientificName,
             image: this.getPlantImage(plant),
             thumbnail: this.getPlantImage(plant, 'thumbnail'),
-            cycle: plant.cycle || 'Unknown',
-            watering: plant.watering || 'Unknown',
-            sunlight: Array.isArray(plant.sunlight) ? plant.sunlight : [plant.sunlight || 'Unknown'],
+            cycle: getCareInfo(plant.cycle, 'Not specified'),
+            watering: getCareInfo(plant.watering, 'Moderate watering'),
+            sunlight: formatSunlight(plant.sunlight),
             indoor: plant.indoor || false,
             description: plant.description || '',
-            careLevel: plant.care_level || 'Unknown',
+            careLevel: getCareInfo(plant.care_level, 'Moderate care'),
             poisonous: plant.poisonous_to_humans || plant.poisonous_to_pets || false,
             edible: plant.edible || false,
             medicinal: plant.medicinal || false,
             flowers: plant.flowers || false,
             flowerColor: plant.flower_color || null,
-            growthRate: plant.growth_rate || 'Unknown',
+            growthRate: getCareInfo(plant.growth_rate, 'Moderate growth'),
             drought_tolerant: plant.drought_tolerant || false,
             salt_tolerant: plant.salt_tolerant || false,
             thorny: plant.thorny || false,
